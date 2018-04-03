@@ -50,12 +50,13 @@ class HoursCounter extends Component {
     let allSongs = this.props.playlists.reduce((songs, eachPlaylist) => {
       return songs.concat(eachPlaylist.songs);
     },[])
+    //console.log(allSongs);
     let totalDuration = allSongs.reduce((sum, eachSong) => {
-      return sum = eachSong.duration;
+      return sum + eachSong.duration;
     }, 0);
     return (
       <div style={{...defaultStyle, width: "40%", display: "inline-block"}}>
-        <h2>{Math.round(totalDuration/60)} hours</h2>
+        <h2>{Math.round((totalDuration/60)/60)} hours</h2>
       </div>
     );
   }
@@ -103,9 +104,13 @@ class App extends Component {
     setTimeout(() => {
       this.setState({serverData: fakeServerData});
     }, 1000);
-    
+
   }
   render() {
+    let playlistToRender = this.state.serverData.user ? this.state.serverData.user.playlists.filter(playlist =>
+      playlist.name.toLowerCase().includes(
+        this.state.filterString.toLowerCase())
+    ) : [];
     return (
       <div className="App">
 
@@ -116,17 +121,11 @@ class App extends Component {
           <div>
           <h1 style={{...defaultStyle, "fontSize": "54px"}}>{
             this.state.serverData.user.name}s Playlist</h1>
-            <PlaylistCounter playlists={this.state.serverData.user &&
-              this.state.serverData.user.playlists} />
-            <HoursCounter playlists={this.state.serverData.user &&
-                this.state.serverData.user.playlists} />
+            <PlaylistCounter playlists={playlistToRender} />
+            <HoursCounter playlists={playlistToRender} />
             <Filter onTextChange={text => this.setState({filterString: text})} />
 
-            {
-              this.state.serverData.user.playlists.filter(playlist =>
-                playlist.name.toLowerCase().includes(
-                  this.state.filterString.toLowerCase())
-              ).map((playlist) => {
+            {playlistToRender.map((playlist) => {
                 return <Playlist playlist={playlist} />
                 }
               )
